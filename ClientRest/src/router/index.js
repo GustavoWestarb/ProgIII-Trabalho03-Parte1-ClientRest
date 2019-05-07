@@ -1,15 +1,20 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import VueMaterial from 'vue-material'
+import 'vue-material/dist/vue-material.min.css'
+import 'vue-material/dist/theme/default.css'
+import MainRest from '@/components/MainRest'
 
 Vue.use(Router)
+Vue.use(VueMaterial)
 
 export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      name: 'MainRest',
+      useEslint: false,
+      component: MainRest
     }
   ]
 })
