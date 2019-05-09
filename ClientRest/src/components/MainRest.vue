@@ -1,12 +1,15 @@
 <template>
   <div class="page-container">
     <md-app md-waterfall md-mode="overlap">
+
+
       <md-app-toolbar class="md-primary">
         <span class="md-title">Trabalho 3 - Gustavo Westarb</span>
       </md-app-toolbar>
 
       <md-app-content>
         <div class="md-layout">
+                
           <md-card class="md-layout-item md-size-25 md-small-size-100" style="max-height: 344px">
             <form novalidate class="md-layout" @submit.prevent="callAjax">
               <md-card-header>
@@ -56,7 +59,7 @@
               </div>
             </md-card-content>
 
-            <md-progress-bar md-mode="indeterminate"/>
+            <md-progress-bar md-mode="indeterminate" />
 
             <md-card-actions>
               <md-button type="submit" class="md-primary" :disabled="sending">Send Request</md-button>
@@ -80,6 +83,14 @@
           </md-table>
         </div>
 
+      <md-dialog-confirm
+            :md-active.sync="active" 
+            md-title="Deletar o registro" 
+            md-content="Deseja deletar o registro?"
+            md-confirm-text="Sim"
+            md-cancel-text="Não"
+            @md-cancel="onCancel"
+            @md-confirm="onConfirm" />
     </md-app-content>
 
   </md-app>
@@ -104,6 +115,7 @@ export default {
   mixins: [validationMixin],
   data: () => ({
     radio: "get",
+    active: false,
     form: {
       name: null,
       salary: null,
@@ -152,6 +164,13 @@ export default {
         }
       }
     },
+    onCancel () {
+      alert("Cancelado")
+    },
+    onConfirm (){
+      this.deleteEmploye(this)
+      alert("Excluido")
+    },
     callAjax () {
       this.sending = true
 
@@ -165,7 +184,7 @@ export default {
         this.putEmployee(this)
       }
       else{
-
+        this.active = true
       }
 
       // if (!this.$v.$invalid) {
@@ -233,15 +252,15 @@ export default {
     putEmployee(args){
       let urlPut = "http://dummy.restapiexample.com/api/v1/update/" + args.form.id 
 
-      let postionEmployee = args.employeesData.findIndex(x => x.id == args.form.id)
-      let name = args.form.name === null ? args.employeesData[postionEmployee].name : args.form.name
-      let age = args.form.age === null ? args.employeesData[postionEmployee].age : args.form.age
-      let salary = args.form.salary === null ? args.employeesData[postionEmployee].salary : args.form.salary
+      let positionEmployee = args.employeesData.findIndex(x => x.id == args.form.id)
+      let name = args.form.name === null ? args.employeesData[positionEmployee].name : args.form.name
+      let age = args.form.age === null ? args.employeesData[positionEmployee].age : args.form.age
+      let salary = args.form.salary === null ? args.employeesData[positionEmployee].salary : args.form.salary
 
       axios.put(urlPut,
         '{"name":"'+ name +'", "salary":"'+ age +'","age":"'+ salary +'"}'
       ).then(response => {
-        args.employeesData[postionEmployee] = JSON.parse('{"id":"' + args.form.id + '","name":"'+ response.data.name + '","salary":"'+ response.data.salary+ '","age":"' + response.data.age+'"}')
+        args.employeesData[positionEmployee] = JSON.parse('{"id":"' + args.form.id + '","name":"'+ response.data.name + '","salary":"'+ response.data.salary+ '","age":"' + response.data.age+'"}')
         args.radio = "get"
         args.radio = "put"
       }).catch(error => {
@@ -251,7 +270,36 @@ export default {
       args.sending = false
     },
     deleteEmploye(args){
-      
+      let urlDelete = "http://dummy.restapiexample.com/api/v1/delete/"
+      let idDelete = 0;
+
+      if(args.form.name !== null){
+        let positionEmployee = args.employeesData.findIndex(x => x.name == args.form.name)
+        idDelete = args.employeesData[positionEmployee].id
+
+        // axios.get("http://dummy.restapiexample.com/api/v1/employees")
+        //   .then(response => {
+        //     let positionEmployee = response.data.findIndex(x => x.employee_name == args.form.name)
+        //     idDelete = response.data[positionEmployee].id
+        //   })
+        //   .catch(error => {
+        //     console.log(error)
+        //   })
+      }else{
+        idDelete = args.form.id
+      }
+
+      urlDelete = urlDelete + idDelete
+      axios.delete(urlDelete)
+        .then(response => {
+          let positionEmployee = args.employeesData.findIndex(x => x.id == idDelete)
+          args.employeesData.splice(positionEmployee, 1)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+
+      args.sending = false
     },
     onChangeRadio(){
       if (this.radio == "put" || this.radio == "post") {
@@ -260,6 +308,7 @@ export default {
         this.disableSalary = false
         this.disableAge = false
       }else if( this.radio == "delete"){
+        this.disableId = false;
         this.disableName = false
         this.disableSalary = true
         this.disableAge = true
