@@ -28,14 +28,14 @@
 
               <div class="md-layout md-gutter">
                 <div class="md-layout-item md-small-size-100">
-                  <md-field :class="getValidationClass('gender')">
+                  <md-field>
                     <label for="identifier">Indentificador</label>
                     <md-input type="number" id="identifier" name="identifier" v-model="form.id" :disabled="disableId"/>
                   </md-field>
                 </div>
 
                 <div class="md-layout-item md-small-size-100">
-                  <md-field :class="getValidationClass('age')">
+                  <md-field>
                     <label for="name">Nome</label>
                     <md-input type="text" id="name" name="name" v-model="form.name" :disabled="disableName"/>
                   </md-field>
@@ -44,14 +44,14 @@
 
               <div class="md-layout md-gutter">
                 <div class="md-layout-item md-small-size-100">
-                  <md-field :class="getValidationClass('gender')">
+                  <md-field>
                     <label for="age">Idade</label>
                     <md-input type="number" id="age" name="age" autocomplete="age" v-model="form.age" :disabled="disableAge"/>
                   </md-field>
                 </div>
 
                 <div class="md-layout-item md-small-size-100">
-                  <md-field :class="getValidationClass('age')">
+                  <md-field>
                     <label for="salary">Salário</label>
                     <md-input type="number" id="salary" name="salary" v-model="form.salary" :disabled="disableSalary"/>
                   </md-field>
@@ -66,7 +66,6 @@
             </md-card-actions>
           </form>
           
-          <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
           </md-card>
 
           <md-table v-model="employeesData" md-card class="md-layout-item md-size-70 md-small-size-100" ref="table">
@@ -86,7 +85,7 @@
       <md-dialog-confirm
             :md-active.sync="active" 
             md-title="Deletar o registro" 
-            md-content="Deseja deletar o registro?"
+            md-content="Deseja realmente deletar o registro selecionado?"
             md-confirm-text="Sim"
             md-cancel-text="Não"
             @md-cancel="onCancel"
@@ -131,45 +130,12 @@ export default {
     disableAge: true,
     lastUser: null
   }),
-  validations: {
-    form: {
-      firstName: {
-        required,
-        minLength: minLength(3)
-      },
-      lastName: {
-        required,
-        minLength: minLength(3)
-      },
-      age: {
-        required,
-        maxLength: maxLength(3)
-      },
-      gender: {
-          required
-      },
-      email: {
-        required,
-        email
-      }
-    }
-  },
   methods: {
-    getValidationClass (fieldName) {
-      const field = this.$v.form[fieldName]
-
-      if (field) {
-        return {
-          'md-invalid': field.$invalid && field.$dirty
-        }
-      }
-    },
     onCancel () {
       alert("Cancelado")
     },
     onConfirm (){
       this.deleteEmploye(this)
-      alert("Excluido")
     },
     callAjax () {
       this.sending = true
@@ -186,10 +152,6 @@ export default {
       else{
         this.active = true
       }
-
-      // if (!this.$v.$invalid) {
-      //   this.saveUser()
-      // }
     },
     getEmploye(args){
 
@@ -276,15 +238,6 @@ export default {
       if(args.form.name !== null){
         let positionEmployee = args.employeesData.findIndex(x => x.name == args.form.name)
         idDelete = args.employeesData[positionEmployee].id
-
-        // axios.get("http://dummy.restapiexample.com/api/v1/employees")
-        //   .then(response => {
-        //     let positionEmployee = response.data.findIndex(x => x.employee_name == args.form.name)
-        //     idDelete = response.data[positionEmployee].id
-        //   })
-        //   .catch(error => {
-        //     console.log(error)
-        //   })
       }else{
         idDelete = args.form.id
       }
@@ -319,6 +272,11 @@ export default {
         this.disableSalary = true
         this.disableAge = true
       }
+
+      this.form.name = null;
+      this.form.id = null;
+      this.form.age = null;
+      this.form.salary = null;
     }
   }
 }
